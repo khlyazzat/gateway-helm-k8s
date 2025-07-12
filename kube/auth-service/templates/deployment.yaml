@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+          - containerPort: {{ .Values.service.port }}
+        env:
+        - name: DATABASE_URL
+          value: "{{ .Values.env.databaseUrl }}"
+        - name: HTTP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: user-app-config
+              key: HTTP_PORT
+        - name: HTTP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: user-app-config
+              key: HTTP_PORT
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: user-app-config
+              key: APP_ENV
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: user-db-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: user-db-secret
+              key: DB_PASSWORD
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: user-db-config
+              key: DB_HOST
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: user-db-config
+              key: DB_NAME
+        - name: DB_SSL_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: user-db-config
+              key: DB_SSL_MODE
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.env.redisConfigMapName }}
+              key: REDIS_HOST
+        - name: REDIS_DB
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.env.redisConfigMapName }}
+              key: REDIS_DB
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.env.redisSecretName }}
+              key: REDIS_PASSWORD
+        - name: JWT_ACCESS_TTL
+          valueFrom:
+            configMapKeyRef:
+              name: user-jwt-config
+              key: JWT_ACCESS_TTL
+        - name: JWT_REFRESH_TTL
+          valueFrom:
+            configMapKeyRef:
+              name: user-jwt-config
+              key: JWT_REFRESH_TTL
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: user-jwt-secret
+              key: JWT_REFRESH_SECRET
+        livenessProbe:
+          httpGet:
+            path: /v1/health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /v1/health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"

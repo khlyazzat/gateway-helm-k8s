@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-jwt-config
+data:
+  JWT_ACCESS_TTL:  "28800"
+  JWT_REFRESH_TTL: "10080"
