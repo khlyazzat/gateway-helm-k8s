@@ -1,0 +1,5 @@
+FROM migrate/migrate
+
+COPY ./services/auth-service/migrations /migrations
+
+ENTRYPOINT ["/bin/sh", "-c", "migrate -path=/migrations -database=$DATABASE_URL up"]

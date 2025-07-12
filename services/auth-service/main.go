@@ -1,0 +1,82 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
+	"main/services/auth-service/internal/config"
+	"main/services/auth-service/internal/db/cache"
+	"main/services/auth-service/internal/db/postgres"
+	"main/services/auth-service/internal/metrics"
+	"main/services/auth-service/internal/middleware"
+	apiRouter "main/services/auth-service/internal/router"
+	"main/services/auth-service/jwt"
+	"main/utils"
+
+	"github.com/joho/godotenv"
+
+	"main/services/auth-service/internal/auth"
+)
+
+func main() {
+	metrics.Init()
+
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("env not loaded")
+	}
+
+	cfg, err := config.New()
+	if err != nil {
+		panic(err)
+	}
+	db := postgres.New(cfg.DBConfig)
+
+	cacheClient, err := cache.NewCache(cfg.RedisConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	tokenCache := cache.NewTokenCache(cacheClient, cfg.JwtConfig.RefreshTTL)
+
+	jwtClient := jwt.New(jwt.Config{
+		RefreshSecret: cfg.JwtConfig.RefreshSecret,
+		AccessTTL:     cfg.JwtConfig.AccessTTL,
+		RefreshTTL:    cfg.JwtConfig.RefreshTTL,
+	})
+
+	router := gin.New()
+
+	router.GET("/metrics", metrics.Handler())
+	router.Use(middleware.MetricsMiddleware)
+
+	v1 := router.Group("/v1")
+
+	healthCClient := apiRouter.NewHealthClient()
+	healthCClient.RegisterRouter(v1)
+
+	authService := auth.NewAuthService(db, tokenCache, jwtClient)
+	authClient := apiRouter.NewAuthClient(authService)
+	authClient.RegisterRouter(v1)
+
+	srv := &http.Server{
+		Addr:    cfg.HTTPConfig.Port,
+		Handler: router,
+	}
+
+	go func() {
+		log.Println("Starting server on", cfg.HTTPConfig.Port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Web server error: %s", err)
+		}
+	}()
+
+	ctx, cancel := utils.GracefulShutdown(context.TODO())
+	defer cancel()
+
+	<-ctx.Done()
+}
