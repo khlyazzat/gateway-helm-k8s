@@ -1,0 +1,5 @@
+/kube/auth-service/secrets
+/kube/auth-service/values.yaml
+/kube/profile-service/secrets
+/kube/profile-service/values.yaml
+/kube/databases/values
