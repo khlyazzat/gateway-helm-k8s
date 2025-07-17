@@ -11,7 +11,11 @@ spec:
     - host: arch.homework
       http:
         paths:
+<<<<<<< HEAD:kube/ingress.yaml
           - path: /()(.*)
+=======
+          - path: /auth(/|$)(.*)
+>>>>>>> 895eb6103ec22341b0a5f8da3585871c2c3e6e28:kube/auth-service/templates/ingress.yaml
             pathType: ImplementationSpecific
             backend:
               service:
