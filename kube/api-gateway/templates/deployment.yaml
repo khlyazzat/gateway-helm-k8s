@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-service
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: api-gateway-service
+  template:
+    metadata:
+      labels:
+        app: api-gateway-service
+    spec:
+      containers:
+      - name: api-gateway
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+          - containerPort: {{ .Values.service.port }}
+        env:
+        - name: HTTP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-config
+              key: HTTP_PORT
+        - name: JWT_ACCESS_TTL
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-jwt-config
+              key: JWT_ACCESS_TTL
+        - name: JWT_REFRESH_TTL
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-jwt-config
+              key: JWT_REFRESH_TTL
+        - name: JWT_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api-gateway-jwt-secret
+              key: JWT_API_SECRET
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api-gateway-jwt-secret
+              key: JWT_REFRESH_SECRET
