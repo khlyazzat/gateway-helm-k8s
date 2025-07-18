@@ -2,15 +2,14 @@ package dto
 
 type (
 	SignUpRequest struct {
-		Email    string
-		Password string
-		Name     string
-		Age      int
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required"`
+		Name     string `json:"name" validate:"required"`
+		Age      int    `json:"age" validate:"required"`
 	}
-
 	SignInRequest struct {
-		Email    string
-		Password string
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required"`
 	}
 
 	RefreshRequest struct {
