@@ -13,6 +13,9 @@ helm upgrade --install auth-service kube/auth-service --namespace architecture-l
 
 helm upgrade --install profile-service kube/profile-service --namespace architecture-lab -f kube/profile-service/values.yaml
 
+helm upgrade --install api-gateway kube/api-gateway --namespace architecture-lab -f kube/api-gateway/values.yaml
+
+
 ### Install PostgreSQL via Helm with custom values
 helm install auth-db oci://registry-1.docker.io/bitnamicharts/postgresql -f kube/databases/values/auth-db.yaml
 
@@ -42,3 +45,8 @@ kubectl delete job auth-service-migrate -n architecture-lab
 
 
 kubectl get pods -n architecture-lab
+
+
+kubectl exec -n architecture-lab <pod-name> -- env
+
+kubectl logs <pod-name> -n architecture-lab
