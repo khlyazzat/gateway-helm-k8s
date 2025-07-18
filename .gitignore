@@ -3,3 +3,5 @@
 /kube/profile-service/secrets
 /kube/profile-service/values.yaml
 /kube/databases/values
+/kube/api-gateway/values.yaml
+/kube/api-gateway/secrets
