@@ -7,6 +7,8 @@ RUN go mod download
 
 COPY services/auth-service ./services/auth-service
 COPY utils ./utils
+COPY pkg ./pkg
+COPY values ./values
 
 WORKDIR /app/services/auth-service
 
