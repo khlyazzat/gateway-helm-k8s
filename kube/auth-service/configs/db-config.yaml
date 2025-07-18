@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: user-db-config
 data:
-  DB_NAME: userservice
-  DB_HOST: users-db-postgresql
+  DB_NAME: authservice
+  DB_HOST: auth-db-postgresql
   DB_SSL_MODE: disable
 

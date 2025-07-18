@@ -25,11 +25,6 @@ spec:
             configMapKeyRef:
               name: user-app-config
               key: HTTP_PORT
-        - name: HTTP_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: user-app-config
-              key: HTTP_PORT
         - name: APP_ENV
           valueFrom:
             configMapKeyRef:
@@ -85,6 +80,11 @@ spec:
             configMapKeyRef:
               name: user-jwt-config
               key: JWT_REFRESH_TTL
+        - name: JWT_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: user-jwt-secret
+              key: JWT_API_SECRET
         - name: JWT_REFRESH_SECRET
           valueFrom:
             secretKeyRef:
