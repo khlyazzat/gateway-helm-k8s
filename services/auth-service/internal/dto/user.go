@@ -6,9 +6,10 @@ type (
 	}
 
 	AddUserRequest struct {
-		Name  string `json:"name" validate:"required"`
-		Email string `json:"email" validate:"required,email"`
-		Age   int    `json:"age" validate:"required"`
+		Name     string `json:"name" validate:"required"`
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required"`
+		Age      int    `json:"age" validate:"required"`
 	}
 
 	GetUserRequest struct {
