@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"os"
 
 	"main/services/auth-service/internal/config"
 
@@ -15,7 +16,7 @@ type DB interface {
 }
 
 func New(cfg config.DBConfig) DB {
-	pgDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(cfg.GetConnectionString())))
+	pgDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(os.Getenv("DATABASE_URL"))))
 	db := bun.NewDB(pgDB, pgdialect.New())
 
 	return db
