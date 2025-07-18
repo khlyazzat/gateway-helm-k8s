@@ -12,7 +12,7 @@ import (
 	"main/services/auth-service/internal/db/postgres"
 	userRepo "main/services/auth-service/internal/db/repository/user"
 	"main/services/auth-service/internal/values"
-	"main/services/auth-service/jwt"
+	"main/pkg/jwt"
 	"main/services/auth-service/utils"
 
 	"main/services/auth-service/internal/dto"
