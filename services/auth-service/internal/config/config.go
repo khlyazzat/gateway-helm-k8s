@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 	"strconv"
 )
@@ -14,7 +13,6 @@ type Config struct {
 }
 
 func New() (*Config, error) {
-	log.Println("os.Getenv", os.Getenv("DB_USER"))
 	redisDB, err := strconv.Atoi(os.Getenv("REDIS_DB"))
 	if err != nil {
 		return nil, err
