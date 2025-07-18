@@ -1,7 +1,11 @@
 package router
 
 import (
+	"errors"
 	"main/services/auth-service/internal/auth"
+	"main/services/auth-service/internal/dto"
+	"main/services/auth-service/internal/values"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,21 +30,21 @@ func (c *authClient) RegisterRouter(g *gin.RouterGroup) {
 func (c *authClient) RegisterAdminRouter(_ *gin.RouterGroup) {}
 
 func (c *authClient) SignUp(ctx *gin.Context) {
-	// var body dto.AddUserRequest
-	// if err := ctx.ShouldBindJSON(&body); err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
-	// 	return
-	// }
-	// res, err := c.service.AddUser(ctx, &body)
-	// if errors.Is(err, values.ErrEmailExists) {
-	// 	ctx.JSON(http.StatusConflict, gin.H{"message": "email already exists"})
-	// 	return
-	// }
-	// if err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"message": "internal error"})
-	// 	return
-	// }
-	// ctx.JSON(http.StatusCreated, gin.H{"id": res.ID})
+	var body dto.SignUpRequest
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
+		return
+	}
+	_, err := c.service.SignUp(ctx, &body)
+	if errors.Is(err, values.ErrEmailExists) {
+		ctx.JSON(http.StatusConflict, gin.H{"message": "email already exists"})
+		return
+	}
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "internal error"})
+		return
+	}
+	ctx.JSON(http.StatusCreated, gin.H{"msg": "new user created"})
 }
 
 func (c *authClient) SignIp(ctx *gin.Context) {
