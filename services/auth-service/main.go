@@ -2,33 +2,26 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
+	"main/pkg/jwt"
 	"main/services/auth-service/internal/config"
 	"main/services/auth-service/internal/db/cache"
 	"main/services/auth-service/internal/db/postgres"
 	"main/services/auth-service/internal/metrics"
 	"main/services/auth-service/internal/middleware"
 	apiRouter "main/services/auth-service/internal/router"
-	"main/services/auth-service/jwt"
 	"main/utils"
-
-	"github.com/joho/godotenv"
 
 	"main/services/auth-service/internal/auth"
 )
 
 func main() {
 	metrics.Init()
-
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("env not loaded")
-	}
 
 	cfg, err := config.New()
 	if err != nil {
@@ -44,6 +37,7 @@ func main() {
 	tokenCache := cache.NewTokenCache(cacheClient, cfg.JwtConfig.RefreshTTL)
 
 	jwtClient := jwt.New(jwt.Config{
+		APISecret:     cfg.JwtConfig.APISecret,
 		RefreshSecret: cfg.JwtConfig.RefreshSecret,
 		AccessTTL:     cfg.JwtConfig.AccessTTL,
 		RefreshTTL:    cfg.JwtConfig.RefreshTTL,
@@ -68,15 +62,25 @@ func main() {
 		Handler: router,
 	}
 
+	ctx, cancel := utils.GracefulShutdown(context.Background())
+	defer cancel()
+
 	go func() {
 		log.Println("Starting server on", cfg.HTTPConfig.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Web server error: %s", err)
+			log.Fatalf("Server error: %s", err)
 		}
 	}()
 
-	ctx, cancel := utils.GracefulShutdown(context.TODO())
-	defer cancel()
-
 	<-ctx.Done()
+	log.Println("Shutting down gracefully...")
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Fatalf("Graceful shutdown failed: %s", err)
+	}
+
+	log.Println("Server stopped")
 }
