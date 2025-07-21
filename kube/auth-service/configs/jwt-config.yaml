@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: user-jwt-config
 data:
-  JWT_ACCESS_TTL:  "28800"
-  JWT_REFRESH_TTL: "10080"
+  JWT_ACCESS_TTL:  "1800"
+  JWT_REFRESH_TTL: "86400"
