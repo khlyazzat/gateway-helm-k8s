@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -23,6 +22,11 @@ func main() {
 	}
 
 	router := gin.Default()
+
+	router.Use(func(c *gin.Context) {
+		log.Println("Incoming request path:", c.Request.Method, c.Request.URL.Path)
+		c.Next()
+	})
 
 	jwtClient := jwt.New(jwt.Config{
 		// Issuer:        cfg.AppConfig.AppName,
@@ -43,30 +47,24 @@ func main() {
 	profileClient := apiRouter.NewProfileClient()
 	profileClient.RegisterRouter(authorize, mwService)
 
+	// for _, ri := range router.Routes() {
+	// 	log.Printf("Route registered: %s %s\n", ri.Method, ri.Path)
+	// }
+
 	srv := &http.Server{
 		Addr:    cfg.HTTPConfig.Port,
 		Handler: router,
 	}
 
-	ctx, cancel := utils.GracefulShutdown(context.Background())
-	defer cancel()
-
 	go func() {
 		log.Println("Starting server on", cfg.HTTPConfig.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server error: %s", err)
+			log.Fatalf("Web server error: %s", err)
 		}
 	}()
 
+	ctx, cancel := utils.GracefulShutdown(context.TODO())
+	defer cancel()
+
 	<-ctx.Done()
-	log.Println("Shutting down gracefully...")
-
-	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer shutdownCancel()
-
-	if err := srv.Shutdown(shutdownCtx); err != nil {
-		log.Fatalf("Graceful shutdown failed: %s", err)
-	}
-
-	log.Println("Server stopped")
 }
