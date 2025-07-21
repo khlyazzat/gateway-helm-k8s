@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"time"
 
+	"main/pkg/jwt"
 	"main/services/auth-service/internal/db/cache"
 	"main/services/auth-service/internal/db/models"
 	"main/services/auth-service/internal/db/postgres"
 	userRepo "main/services/auth-service/internal/db/repository/user"
 	"main/services/auth-service/internal/values"
-	"main/pkg/jwt"
 	"main/services/auth-service/utils"
 
 	"main/services/auth-service/internal/dto"
