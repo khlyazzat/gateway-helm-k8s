@@ -2,17 +2,18 @@ package proxy
 
 import (
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func ProxyToAuth(c *gin.Context) {
-	proxyRequest(c, "http://auth-service:8080")
+	proxyRequest(c, "http://auth-service")
 }
 
 func ProxyToProfile(c *gin.Context) {
-	proxyRequest(c, "http://profile-service:8080")
+	proxyRequest(c, "http://profile-service")
 }
 
 func proxyRequest(c *gin.Context, targetHost string) {
@@ -43,4 +44,6 @@ func proxyRequest(c *gin.Context, targetHost string) {
 
 	bodyBytes, _ := io.ReadAll(resp.Body)
 	c.Writer.Write(bodyBytes)
+
+	log.Println("api-gateway bodyBytes: ", string(bodyBytes))
 }
