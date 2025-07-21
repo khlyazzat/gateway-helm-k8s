@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"main/services/api-gateway/internal/values"
 	"strings"
 
@@ -21,12 +22,12 @@ type middleware struct {
 
 // Error implements Middleware.
 func (m *middleware) Error(c *gin.Context) {
-	panic("unimplemented")
+	//panic("unimplemented")
 }
 
 // Panic implements Middleware.
 func (m *middleware) Panic(c *gin.Context) {
-	panic("unimplemented")
+	//panic("unimplemented")
 }
 
 func (m *middleware) Authorize(c *gin.Context) {
@@ -59,6 +60,7 @@ func (m *middleware) Authorize(c *gin.Context) {
 	c.Set("userID", claims.Subject)
 	c.Next()
 
+	log.Println("api-gateway middleware authorize claims.Subject: ", claims.Subject)
 }
 
 func New(jwt jwt.JWT) Middleware {
