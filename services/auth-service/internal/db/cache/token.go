@@ -16,7 +16,7 @@ type tokenCache struct {
 }
 
 func (r *tokenCache) SetRefreshToken(ctx context.Context, userID string, refreshToken string) error {
-	return r.Set(ctx, userID, refreshToken, time.Duration(r.RefreshTTL)*time.Minute)
+	return r.Set(ctx, userID, refreshToken, time.Duration(r.RefreshTTL)*time.Second)
 }
 
 func (r *tokenCache) RefreshTokenExist(ctx context.Context, userID string, refreshToken string) (bool, error) {
