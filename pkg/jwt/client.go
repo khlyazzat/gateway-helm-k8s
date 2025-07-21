@@ -68,7 +68,7 @@ func (j *jwtClient) GenerateToken(id string, secretType Kind) (string, int, erro
 		return "", 0, values.ErrInvalidSigningToken
 	}
 
-	return signedToken, int(expiresAt.Minutes()), nil
+	return signedToken, int(expiresAt.Seconds()), nil
 }
 
 func (j *jwtClient) ParseJWTToken(accessToken string) (*TokenClaims, error) {
@@ -112,7 +112,7 @@ func New(cfg Config) JWT {
 		secret:        cfg.APISecret,
 		refreshSecret: cfg.RefreshSecret,
 		issuer:        cfg.Issuer,
-		accessTTL:     time.Minute * time.Duration(cfg.AccessTTL),
-		refreshTTL:    time.Minute * time.Duration(cfg.RefreshTTL),
+		accessTTL:     time.Second * time.Duration(cfg.AccessTTL),
+		refreshTTL:    time.Second * time.Duration(cfg.RefreshTTL),
 	}
 }
