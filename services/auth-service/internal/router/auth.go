@@ -32,23 +32,45 @@ func (c *authClient) RegisterAdminRouter(_ *gin.RouterGroup) {}
 func (c *authClient) SignUp(ctx *gin.Context) {
 	var body dto.SignUpRequest
 	if err := ctx.ShouldBindJSON(&body); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
+		_ = ctx.Error(err)
 		return
 	}
 	_, err := c.service.SignUp(ctx, &body)
 	if errors.Is(err, values.ErrEmailExists) {
-		ctx.JSON(http.StatusConflict, gin.H{"message": "email already exists"})
+		_ = ctx.Error(err)
 		return
 	}
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "internal error"})
+		_ = ctx.Error(err)
 		return
 	}
-	ctx.JSON(http.StatusCreated, gin.H{"msg": "new user created"})
+	ctx.JSON(http.StatusCreated, gin.H{"msg": "new user created"}) //TODO
 }
 
 func (c *authClient) SignIp(ctx *gin.Context) {
+	var body dto.SignInRequest
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		_ = ctx.Error(err)
+		return
+	}
+	resp, err := c.service.SignIn(ctx, &body)
+	if err != nil {
+		_ = ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func (c *authClient) Refresh(ctx *gin.Context) {
+	var body dto.RefreshRequest
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		_ = ctx.Error(err)
+		return
+	}
+	resp, err := c.service.Refresh(ctx, &body)
+	if err != nil {
+		_ = ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, resp)
 }
