@@ -38,7 +38,6 @@ func (s *authService) SignUp(ctx context.Context, request *dto.SignUpRequest) (*
 	if user != nil {
 		return nil, values.ErrEmailExists
 	}
-
 	newUser := &models.User{
 		Name:      request.Name,
 		Password:  utils.HashPassword(request.Password),
@@ -46,7 +45,6 @@ func (s *authService) SignUp(ctx context.Context, request *dto.SignUpRequest) (*
 		Age:       request.Age,
 		CreatedAt: time.Now(),
 	}
-
 	_, err = s.userRepo.AddUser(ctx, newUser)
 	if err != nil {
 		return nil, err
@@ -59,8 +57,8 @@ func (s *authService) SignIn(ctx context.Context, request *dto.SignInRequest) (*
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
-	if user != nil {
-		return nil, values.ErrEmailExists
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, values.ErrWrongLoginOrPassword //TODO
 	}
 	if !utils.CheckPassword(request.Password, user.Password) {
 		return nil, values.ErrWrongLoginOrPassword
@@ -88,19 +86,19 @@ func (s *authService) Refresh(ctx context.Context, request *dto.RefreshRequest) 
 	if err != nil {
 		return nil, values.ErrParseToken
 	}
-	exists, err := s.tokenCache.RefreshTokenExist(ctx, claims.Id, request.Token)
+	exists, err := s.tokenCache.RefreshTokenExist(ctx, claims.Subject, request.Token)
 	if err != nil || !exists {
 		return nil, values.ErrGetRefreshToken
 	}
-	jwtToken, ttl, err := s.jwt.GenerateToken(claims.Id, jwt.Access)
+	jwtToken, ttl, err := s.jwt.GenerateToken(claims.Subject, jwt.Access)
 	if err != nil {
 		return nil, err
 	}
-	refreshToken, _, err := s.jwt.GenerateToken(claims.Id, jwt.Refresh)
+	refreshToken, _, err := s.jwt.GenerateToken(claims.Subject, jwt.Refresh)
 	if err != nil {
 		return nil, err
 	}
-	if err = s.tokenCache.SetRefreshToken(ctx, claims.Id, refreshToken); err != nil {
+	if err = s.tokenCache.SetRefreshToken(ctx, claims.Subject, refreshToken); err != nil {
 		return nil, values.ErrSetRefreshToken
 	}
 	return &dto.TokenResponse{
