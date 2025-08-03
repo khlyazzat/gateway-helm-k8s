@@ -1,0 +1,6 @@
+prometheus:
+  prometheusSpec:
+    maximumStartupDurationSeconds: 300
+    serviceMonitorSelector:
+      matchLabels:
+        release: prometheus
