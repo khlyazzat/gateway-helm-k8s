@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: profile-app-config
+data:
+  HTTP_PORT: ":8080"
+  APP_ENV: "test"
