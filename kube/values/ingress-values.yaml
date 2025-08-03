@@ -1,0 +1,21 @@
+controller:
+  metrics:
+    enabled: true
+    service:
+      enabled: true
+      port: 10254
+      targetPort: 10254
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "10254"
+        prometheus.io/path: "/metrics"
+
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: prometheus
+
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10254"
+    prometheus.io/path: "/metrics"
