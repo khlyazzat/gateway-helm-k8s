@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"main/services/api-gateway/internal/values"
 	"strings"
 
@@ -57,10 +56,13 @@ func (m *middleware) Authorize(c *gin.Context) {
 		return
 	}
 
-	c.Set("userID", claims.Subject)
-	c.Next()
+	c.Set("email", claims.Email)
 
-	log.Println("api-gateway middleware authorize claims.Subject: ", claims.Subject)
+	c.Set("userID", claims.Subject)
+
+	c.Request.Header.Add("X-User-ID", claims.Subject)
+
+	c.Next()
 }
 
 func New(jwt jwt.JWT) Middleware {
