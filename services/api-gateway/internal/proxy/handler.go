@@ -2,48 +2,53 @@ package proxy
 
 import (
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func ProxyToAuth(c *gin.Context) {
-	proxyRequest(c, "http://auth-service")
+func ProxyToAuth(ctx *gin.Context) {
+	proxyRequest(ctx, "http://auth-service")
 }
 
-func ProxyToProfile(c *gin.Context) {
-	proxyRequest(c, "http://profile-service")
+func ProxyToProfile(ctx *gin.Context) {
+	proxyRequest(ctx, "http://profile-service")
 }
 
-func proxyRequest(c *gin.Context, targetHost string) {
-	targetURL := targetHost + c.Request.URL.Path
+func proxyRequest(ctx *gin.Context, targetHost string) {
+	targetURL := targetHost + ctx.Request.URL.Path
 
-	req, err := http.NewRequest(c.Request.Method, targetURL, c.Request.Body)
+	req, err := http.NewRequest(ctx.Request.Method, targetURL, ctx.Request.Body)
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create request"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create request"})
 		return
 	}
 
-	for k, v := range c.Request.Header {
+	if targetHost == "http://profile-service" {
+		email := ctx.GetString("email")
+
+		req.Header.Add("X-User-Email", email)
+	}
+
+	for k, v := range ctx.Request.Header {
 		req.Header[k] = v
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
+
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to proxy request"})
+		ctx.JSON(http.StatusBadGateway, gin.H{"error": "failed to proxy request"})
 		return
 	}
 	defer resp.Body.Close()
 
 	for k, v := range resp.Header {
-		c.Writer.Header()[k] = v
+		ctx.Writer.Header()[k] = v
 	}
-	c.Writer.WriteHeader(resp.StatusCode)
+	ctx.Writer.WriteHeader(resp.StatusCode)
 
 	bodyBytes, _ := io.ReadAll(resp.Body)
-	c.Writer.Write(bodyBytes)
-
-	log.Println("api-gateway bodyBytes: ", string(bodyBytes))
+	ctx.Writer.Write(bodyBytes)
 }
