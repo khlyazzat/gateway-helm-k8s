@@ -20,8 +20,6 @@ type User interface {
 	AddUser(ctx context.Context, user *models.User) (int64, error)
 	GetUserByID(ctx context.Context, userId int64) (*models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
-	UpdateUser(ctx context.Context, user *models.User) (*models.User, error)
-	DeleteUser(ctx context.Context, user *models.User) error
 }
 
 type userRepository struct {
@@ -90,38 +88,6 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 		return nil, fmt.Errorf("failed to get user by email: %w", err)
 	}
 	return user, nil
-}
-
-func (r *userRepository) UpdateUser(ctx context.Context, user *models.User) (*models.User, error) {
-	err := r.DB.NewUpdate().
-		Model(user).
-		WherePK().
-		Returning("*").
-		Scan(ctx)
-
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("%w: id=%d", values.ErrUserNotFound, user.ID)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to update user: %w", err)
-	}
-	return user, nil
-}
-
-func (r *userRepository) DeleteUser(ctx context.Context, user *models.User) error {
-	res, err := r.DB.NewDelete().
-		Model(user).
-		WherePK().
-		Exec(ctx)
-
-	if err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
-	}
-	rowsAffected, _ := res.RowsAffected()
-	if rowsAffected == 0 {
-		return fmt.Errorf("%w: id=%d", values.ErrUserNotFound, user.ID)
-	}
-	return nil
 }
 
 func New(db db.DB) User {
