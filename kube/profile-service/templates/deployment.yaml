@@ -18,5 +18,34 @@ spec:
           ports:
             - containerPort: {{ .Values.service.port }}
           env:
-            - name: DATABASE_URL
-              value: "{{ .Values.env.databaseUrl }}"
+          - name: DATABASE_URL
+            value: "{{ .Values.env.databaseUrl }}"
+          - name: HTTP_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: profile-app-config
+                key: HTTP_PORT
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
