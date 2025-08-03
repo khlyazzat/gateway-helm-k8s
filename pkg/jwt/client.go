@@ -17,7 +17,7 @@ const (
 )
 
 type JWT interface {
-	GenerateToken(string, Kind) (string, int, error)
+	GenerateToken(string, string, Kind) (string, int, error)
 	ParseJWTToken(string) (*TokenClaims, error)
 }
 
@@ -40,9 +40,10 @@ type jwtClient struct {
 type TokenClaims struct {
 	jwt.StandardClaims
 	SecretType Kind
+	Email      string
 }
 
-func (j *jwtClient) GenerateToken(id string, secretType Kind) (string, int, error) {
+func (j *jwtClient) GenerateToken(id string, email string, secretType Kind) (string, int, error) {
 	var expiresAt time.Duration
 	var secret string
 
@@ -61,6 +62,7 @@ func (j *jwtClient) GenerateToken(id string, secretType Kind) (string, int, erro
 			ExpiresAt: time.Now().Add(expiresAt).Unix(),
 		},
 		secretType,
+		email,
 	})
 
 	signedToken, err := token.SignedString([]byte(secret))
