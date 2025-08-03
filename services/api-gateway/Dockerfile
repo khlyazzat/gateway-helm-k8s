@@ -21,5 +21,4 @@ WORKDIR /root/
 COPY --from=builder /app/services/api-gateway/app .
 
 ENTRYPOINT ["./app"]
-# ENTRYPOINT ["sh", "-c", "env && ./app"]
 
