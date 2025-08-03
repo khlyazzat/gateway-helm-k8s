@@ -21,13 +21,6 @@ func main() {
 		panic(err)
 	}
 
-	router := gin.Default()
-
-	router.Use(func(c *gin.Context) {
-		log.Println("Incoming request path:", c.Request.Method, c.Request.URL.Path)
-		c.Next()
-	})
-
 	jwtClient := jwt.New(jwt.Config{
 		// Issuer:        cfg.AppConfig.AppName,
 		APISecret:     cfg.JwtConfig.APISecret,
@@ -38,6 +31,13 @@ func main() {
 
 	mwService := middleware.New(jwtClient)
 
+	router := gin.Default()
+
+	// router.Use(func(c *gin.Context) {
+	// 	log.Println("Incoming request path:", c.Request.Method, c.Request.URL.Path)
+	// 	c.Next()
+	// })
+
 	v1 := router.Group("/v1", mwService.Error, mwService.Panic)
 	authorize := v1.Group("", mwService.Authorize)
 
@@ -46,10 +46,6 @@ func main() {
 
 	profileClient := apiRouter.NewProfileClient()
 	profileClient.RegisterRouter(authorize, mwService)
-
-	// for _, ri := range router.Routes() {
-	// 	log.Printf("Route registered: %s %s\n", ri.Method, ri.Path)
-	// }
 
 	srv := &http.Server{
 		Addr:    cfg.HTTPConfig.Port,
