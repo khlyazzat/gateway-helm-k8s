@@ -12,7 +12,8 @@ type profileClient struct {
 
 func (c *profileClient) RegisterRouter(g *gin.RouterGroup, _ middleware.Middleware) {
 	profileGroup := g.Group("/profile")
-	profileGroup.Any("/*proxyPath", proxy.ProxyToProfile)
+	profileGroup.GET("/get", proxy.ProxyToProfile)
+	profileGroup.PUT("/update", proxy.ProxyToProfile)
 }
 
 func (c *profileClient) RegisterAdminRouter(_ *gin.RouterGroup, _ middleware.Middleware) {}
