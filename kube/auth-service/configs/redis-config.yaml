@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: user-redis-config
 data:
-  REDIS_HOST: redis-master.default.svc.cluster.local:6379
+  REDIS_HOST: redis-master.architecture-lab.svc.cluster.local:6379
   REDIS_DB: "0"

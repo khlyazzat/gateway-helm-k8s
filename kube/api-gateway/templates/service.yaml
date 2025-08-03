@@ -6,6 +6,11 @@ spec:
   selector:
     app: api-gateway-service
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: {{ .Values.service.port }}
+    - name: metrics
+      protocol: TCP
+      port: 8080         
+      targetPort: 8080
