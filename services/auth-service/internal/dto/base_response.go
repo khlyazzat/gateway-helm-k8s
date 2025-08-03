@@ -12,3 +12,4 @@ type (
 		Tag     string `json:"tag,omitempty"`
 	}
 )
+
