@@ -39,10 +39,8 @@ func (s *authService) SignUp(ctx context.Context, request *dto.SignUpRequest) (*
 		return nil, values.ErrEmailExists
 	}
 	newUser := &models.User{
-		Name:      request.Name,
 		Password:  utils.HashPassword(request.Password),
 		Email:     request.Email,
-		Age:       request.Age,
 		CreatedAt: time.Now(),
 	}
 	_, err = s.userRepo.AddUser(ctx, newUser)
@@ -63,11 +61,11 @@ func (s *authService) SignIn(ctx context.Context, request *dto.SignInRequest) (*
 	if !utils.CheckPassword(request.Password, user.Password) {
 		return nil, values.ErrWrongLoginOrPassword
 	}
-	jwtToken, ttl, err := s.jwt.GenerateToken(strconv.Itoa(int(user.ID)), jwt.Access)
+	jwtToken, ttl, err := s.jwt.GenerateToken(strconv.Itoa(int(user.ID)), user.Email, jwt.Access)
 	if err != nil {
 		return nil, err
 	}
-	refreshToken, _, err := s.jwt.GenerateToken(strconv.Itoa(int(user.ID)), jwt.Refresh)
+	refreshToken, _, err := s.jwt.GenerateToken(strconv.Itoa(int(user.ID)), user.Email, jwt.Refresh)
 	if err != nil {
 		return nil, err
 	}
@@ -90,11 +88,11 @@ func (s *authService) Refresh(ctx context.Context, request *dto.RefreshRequest) 
 	if err != nil || !exists {
 		return nil, values.ErrGetRefreshToken
 	}
-	jwtToken, ttl, err := s.jwt.GenerateToken(claims.Subject, jwt.Access)
+	jwtToken, ttl, err := s.jwt.GenerateToken(claims.Subject, claims.Email, jwt.Access)
 	if err != nil {
 		return nil, err
 	}
-	refreshToken, _, err := s.jwt.GenerateToken(claims.Subject, jwt.Refresh)
+	refreshToken, _, err := s.jwt.GenerateToken(claims.Subject, claims.Email, jwt.Refresh)
 	if err != nil {
 		return nil, err
 	}
